@@ -1,18 +1,23 @@
 import { useState, useEffect } from "react";
 
-export default function TemplateEditor() {
+export default function TemplateEditor({ selectedTemplate }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("");
 
   useEffect(() => {
-    const last = localStorage.getItem("draft-template");
-    if (last) {
-      const parsed = JSON.parse(last);
-      setTitle(parsed.title);
-      setContent(parsed.content);
+    if (selectedTemplate) {
+      setTitle(selectedTemplate.title);
+      setContent(selectedTemplate.content);
+    } else {
+      const last = localStorage.getItem("draft-template");
+      if (last) {
+        const parsed = JSON.parse(last);
+        setTitle(parsed.title);
+        setContent(parsed.content);
+      }
     }
-  }, []);
+  }, [selectedTemplate]);
 
   const handleSave = () => {
     if (!title.trim()) {
@@ -20,7 +25,12 @@ export default function TemplateEditor() {
       return;
     }
 
-    const template = { title, content, updatedAt: new Date().toISOString() };
+    const template = {
+      title,
+      content,
+      updatedAt: new Date().toISOString(),
+    };
+
     localStorage.setItem(`template:${title}`, JSON.stringify(template));
     localStorage.setItem("draft-template", JSON.stringify(template));
     setStatus("Template saved ✔");

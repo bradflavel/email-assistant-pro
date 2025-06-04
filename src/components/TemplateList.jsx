@@ -4,14 +4,15 @@ export default function TemplateList({ onSelect }) {
   const [templates, setTemplates] = useState([]);
 
   useEffect(() => {
-    const keys = Object.keys(localStorage).filter(key =>
+    const keys = Object.keys(localStorage).filter((key) =>
       key.startsWith("template:")
     );
-    const loaded = keys.map(key => {
-      const item = localStorage.getItem(key);
-      const { title, updatedAt } = JSON.parse(item);
+
+    const loaded = keys.map((key) => {
+      const { title, updatedAt } = JSON.parse(localStorage.getItem(key));
       return { title, updatedAt };
     });
+
     setTemplates(loaded);
   }, []);
 
