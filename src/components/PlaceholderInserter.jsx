@@ -1,10 +1,11 @@
 const placeholders = [
-  "{firstName}",
-  "{lastName}",
-  "{jobTitle}",
-  "{company}",
-  "{meetingDate}",
-  "{senderName}",
+  "{customerName}",
+  "{shipmentID}",
+  "{delDate}",
+  "{newShipmentID}",
+  "{newAddress",
+  "{serviceHub}",
+  "{myName}",
 ];
 
 export default function PlaceholderInserter({ onInsert }) {
