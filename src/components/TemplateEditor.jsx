@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PlaceholderInserter from "./PlaceholderInserter";
 
 export default function TemplateEditor({ selectedTemplate }) {
   const [title, setTitle] = useState("");
@@ -37,6 +38,10 @@ export default function TemplateEditor({ selectedTemplate }) {
     setTimeout(() => setStatus(""), 2000);
   };
 
+  const handleInsertPlaceholder = (tag) => {
+    setContent((prev) => prev + " " + tag);
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow-md space-y-4">
       <div>
@@ -52,6 +57,7 @@ export default function TemplateEditor({ selectedTemplate }) {
 
       <div>
         <label className="block font-semibold mb-1">Email Content</label>
+        <PlaceholderInserter onInsert={handleInsertPlaceholder} />
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
