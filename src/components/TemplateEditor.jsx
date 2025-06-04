@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import PlaceholderInserter from "./PlaceholderInserter";
-import PlaceholderPreviewer from "./PlaceholderPreviewer";
 
-export default function TemplateEditor({ selectedTemplate }) {
+export default function TemplateEditor({ selectedTemplate, onBack }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("");
@@ -45,6 +44,18 @@ export default function TemplateEditor({ selectedTemplate }) {
 
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow-md space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Edit Template</h2>
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="text-sm text-muted-foreground hover:underline"
+          >
+            ⬅ Back
+          </button>
+        )}
+      </div>
+
       <div>
         <label className="block font-semibold mb-1">Template Title</label>
         <input
@@ -66,7 +77,6 @@ export default function TemplateEditor({ selectedTemplate }) {
           rows={10}
           className="w-full px-3 py-2 border rounded-md bg-background text-foreground resize-none"
         />
-        <PlaceholderPreviewer content={content} />
       </div>
 
       <div className="flex items-center justify-between">
@@ -76,7 +86,9 @@ export default function TemplateEditor({ selectedTemplate }) {
         >
           Save Template
         </button>
-        {status && <span className="text-sm text-muted-foreground">{status}</span>}
+        {status && (
+          <span className="text-sm text-muted-foreground">{status}</span>
+        )}
       </div>
     </div>
   );
