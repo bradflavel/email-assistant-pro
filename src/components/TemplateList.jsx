@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function TemplateList({ onSelect }) {
+export default function TemplateList({ onSelect, refreshKey, setRefreshKey }) {
   const [templates, setTemplates] = useState([]);
 
   useEffect(() => {
@@ -12,7 +12,27 @@ export default function TemplateList({ onSelect }) {
       return { title, updatedAt };
     });
     setTemplates(loaded);
-  }, []);
+  }, [refreshKey]);
+
+  const handleRename = (oldTitle) => {
+    const newTitle = prompt("New template name:", oldTitle);
+    if (!newTitle || newTitle === oldTitle) return;
+    const data = localStorage.getItem(`template:${oldTitle}`);
+    if (!data) return;
+    const parsed = JSON.parse(data);
+    parsed.title = newTitle;
+    localStorage.removeItem(`template:${oldTitle}`);
+    localStorage.setItem(`template:${newTitle}`, JSON.stringify(parsed));
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleDelete = (title) => {
+    if (confirm(`Delete "${title}"?`)) {
+      localStorage.removeItem(`template:${title}`);
+      localStorage.removeItem(`filled:${title}`);
+      setRefreshKey(prev => prev + 1);
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -24,16 +44,21 @@ export default function TemplateList({ onSelect }) {
       </button>
 
       {templates.map((tpl) => (
-        <button
-          key={tpl.title}
-          onClick={() => onSelect(tpl.title)}
-          className="w-full text-left px-2 py-1 bg-muted hover:bg-accent rounded-md"
-        >
-          <div className="font-semibold">{tpl.title}</div>
-          <div className="text-xs text-muted-foreground">
-            Last edited: {new Date(tpl.updatedAt).toLocaleString()}
+        <div key={tpl.title} className="group relative">
+          <button
+            onClick={() => onSelect(tpl.title)}
+            className="w-full text-left px-2 py-1 bg-muted hover:bg-accent rounded-md"
+          >
+            <div className="font-semibold">{tpl.title}</div>
+            <div className="text-xs text-muted-foreground">
+              Last edited: {new Date(tpl.updatedAt).toLocaleString()}
+            </div>
+          </button>
+          <div className="absolute top-1 right-2 hidden group-hover:flex gap-1">
+            <button onClick={() => handleRename(tpl.title)} className="text-xs text-foreground hover:text-blue-500">✏️</button>
+            <button onClick={() => handleDelete(tpl.title)} className="text-xs text-foreground hover:text-red-500">🗑️</button>
           </div>
-        </button>
+        </div>
       ))}
     </div>
   );
