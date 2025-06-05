@@ -1,10 +1,16 @@
 const placeholders = [
   "customerName",
   "shipmentID",
+  "enquiryNumber",
   "delDate",
+  "depotName",
+  "depotAddress",
+  "depotHours",
   "newShipmentID",
   "newAddress",
-  "serviceHub",
+  "serviceHubName",
+  "serviceHubAddress",
+  "serviceHubHours",
   "myName",
 ];
 

@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import TemplateList from "./components/TemplateList";
 import TemplateEditor from "./components/TemplateEditor";
 import PlaceholderPreviewer from "./components/PlaceholderPreviewer";
+import SettingsModal from "./components/SettingsModal";
 
 export default function App() {
   const [mode, setMode] = useState("home");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const fileInputRef = useRef();
+  const [showSettings, setShowSettings] = useState(false);
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    document.documentElement.classList.toggle("dark", storedTheme === "dark");
+  }, []);
 
   const handleTemplateSelect = (title) => {
     if (!title) {
@@ -27,48 +35,52 @@ export default function App() {
     setMode("home");
   };
 
-  const handleImport = () => {
-    const input = prompt("Paste exported JSON array:");
-    try {
-      const templates = JSON.parse(input);
-      if (Array.isArray(templates)) {
-        templates.forEach(({ title, content }) => {
-          if (title && content) {
-            localStorage.setItem(`template:${title}`, JSON.stringify({
-              title,
-              content,
-              updatedAt: new Date().toISOString()
-            }));
-          }
-        });
-        setRefreshKey(prev => prev + 1);
-        alert("Templates imported.");
-      } else {
-        alert("Invalid JSON format.");
-      }
-    } catch {
-      alert("Failed to parse JSON.");
-    }
-  };
+  const handleImportClick = () => fileInputRef.current?.click();
 
-  const handleExport = () => {
-    const keys = Object.keys(localStorage).filter(k => k.startsWith("template:"));
-    const templates = keys.map(k => JSON.parse(localStorage.getItem(k)));
-    const data = JSON.stringify(templates, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "templates.json";
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExport = async () => {
+    try {
+      const opts = {
+        suggestedName: "templates.json",
+        types: [
+          {
+            description: "JSON Files",
+            accept: { "application/json": [".json"] },
+          },
+        ],
+      };
+      const handle = await window.showSaveFilePicker(opts);
+      const writable = await handle.createWritable();
+      const keys = Object.keys(localStorage).filter((k) =>
+        k.startsWith("template:")
+      );
+      const templates = keys.map((k) =>
+        JSON.parse(localStorage.getItem(k))
+      );
+      const data = JSON.stringify(templates, null, 2);
+      await writable.write(data);
+      await writable.close();
+      alert("Templates saved.");
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        alert("Failed to save file.");
+      }
+    }
   };
 
   return (
     <div className="flex min-h-screen overflow-hidden bg-background text-foreground">
       <aside className="w-64 bg-muted p-4 border-r border-border flex flex-col justify-between">
         <div>
-          <h2 className="text-xl font-semibold mb-4">Templates</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Templates</h2>
+            <button
+              onClick={() => setShowSettings(true)}
+              title="Settings"
+              className="hover:opacity-70"
+            >
+              ⚙️
+            </button>
+          </div>
           <TemplateList
             onSelect={handleTemplateSelect}
             refreshKey={refreshKey}
@@ -76,8 +88,45 @@ export default function App() {
           />
         </div>
         <div className="space-y-2 mt-6">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                try {
+                  const templates = JSON.parse(event.target.result);
+                  if (Array.isArray(templates)) {
+                    templates.forEach(({ title, content }) => {
+                      if (title && content) {
+                        localStorage.setItem(
+                          `template:${title}`,
+                          JSON.stringify({
+                            title,
+                            content,
+                            updatedAt: new Date().toISOString(),
+                          })
+                        );
+                      }
+                    });
+                    setRefreshKey((prev) => prev + 1);
+                    alert("Templates imported.");
+                  } else {
+                    alert("Invalid JSON format.");
+                  }
+                } catch {
+                  alert("Failed to parse JSON.");
+                }
+              };
+              reader.readAsText(file);
+            }}
+          />
           <button
-            onClick={handleImport}
+            onClick={handleImportClick}
             className="w-full text-sm px-2 py-1 bg-muted text-foreground border rounded-md hover:bg-accent"
           >
             📥 Import Templates
@@ -86,7 +135,7 @@ export default function App() {
             onClick={handleExport}
             className="w-full text-sm px-2 py-1 bg-muted text-foreground border rounded-md hover:bg-accent"
           >
-            📤 Export All Templates
+            📤 Export Templates
           </button>
         </div>
       </aside>
@@ -119,7 +168,7 @@ export default function App() {
             selectedTemplate={selectedTemplate}
             onBack={() => {
               handleBack();
-              setRefreshKey(prev => prev + 1);
+              setRefreshKey((prev) => prev + 1);
             }}
           />
         )}
@@ -138,6 +187,9 @@ export default function App() {
           </div>
         )}
       </main>
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} />
+      )}
     </div>
   );
 }

@@ -35,7 +35,10 @@ export default function TemplateEditor({ selectedTemplate, onBack }) {
     localStorage.setItem(`template:${title}`, JSON.stringify(template));
     localStorage.setItem("draft-template", JSON.stringify(template));
     setStatus("Template saved ✔");
-    setTimeout(() => setStatus(""), 2000);
+    setTimeout(() => {
+      setStatus("");
+      if (onBack) onBack(); 
+    }, 800);
   };
 
   const handleInsertPlaceholder = (tag) => {
