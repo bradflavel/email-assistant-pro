@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false  
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -29,4 +31,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          persist-credentials: false
