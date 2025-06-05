@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import TemplateList from "./components/TemplateList";
 import TemplateEditor from "./components/TemplateEditor";
 import PlaceholderPreviewer from "./components/PlaceholderPreviewer";
@@ -7,6 +7,7 @@ export default function App() {
   const [mode, setMode] = useState("home");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const fileInputRef = useRef();
 
   const handleTemplateSelect = (title) => {
     if (!title) {
@@ -27,29 +28,7 @@ export default function App() {
     setMode("home");
   };
 
-  const handleImport = () => {
-    const input = prompt("Paste exported JSON array:");
-    try {
-      const templates = JSON.parse(input);
-      if (Array.isArray(templates)) {
-        templates.forEach(({ title, content }) => {
-          if (title && content) {
-            localStorage.setItem(`template:${title}`, JSON.stringify({
-              title,
-              content,
-              updatedAt: new Date().toISOString()
-            }));
-          }
-        });
-        setRefreshKey(prev => prev + 1);
-        alert("Templates imported.");
-      } else {
-        alert("Invalid JSON format.");
-      }
-    } catch {
-      alert("Failed to parse JSON.");
-    }
-  };
+  const handleImportClick = () => fileInputRef.current?.click();
 
   const handleExport = () => {
     const keys = Object.keys(localStorage).filter(k => k.startsWith("template:"));
@@ -76,8 +55,43 @@ export default function App() {
           />
         </div>
         <div className="space-y-2 mt-6">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                try {
+                  const templates = JSON.parse(event.target.result);
+                  if (Array.isArray(templates)) {
+                    templates.forEach(({ title, content }) => {
+                      if (title && content) {
+                        localStorage.setItem(`template:${title}`, JSON.stringify({
+                          title,
+                          content,
+                          updatedAt: new Date().toISOString()
+                        }));
+                      }
+                    });
+                    setRefreshKey(prev => prev + 1);
+                    alert("Templates imported.");
+                  } else {
+                    alert("Invalid JSON format.");
+                  }
+                } catch {
+                  alert("Failed to parse JSON.");
+                }
+              };
+              reader.readAsText(file);
+            }}
+          />
           <button
-            onClick={handleImport}
+            onClick={handleImportClick}
             className="w-full text-sm px-2 py-1 bg-muted text-foreground border rounded-md hover:bg-accent"
           >
             📥 Import Templates
