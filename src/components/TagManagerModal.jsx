@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function normalizeTag(value) {
   return value.replace(/[{}]/g, "").trim();
@@ -17,6 +17,22 @@ export default function TagManagerModal({
   const canAdd =
     normalizedValue.length > 0 && !existingTags.includes(normalizedValue);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        if (pendingDeleteTag) {
+          setPendingDeleteTag(null);
+          return;
+        }
+
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, pendingDeleteTag]);
+
   const handleSubmit = () => {
     if (!canAdd) {
       return;
@@ -32,8 +48,12 @@ export default function TagManagerModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="tag-manager-title"
+      onClick={onClose}
     >
-      <div className="w-full max-w-2xl rounded-[28px] border border-border bg-background p-8 shadow-[0_24px_80px_rgba(15,23,42,0.26)]">
+      <div
+        className="w-full max-w-2xl rounded-[28px] border border-border bg-background p-8 shadow-[0_24px_80px_rgba(15,23,42,0.26)]"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <h2 id="tag-manager-title" className="text-lg font-semibold">
             {mode === "add" ? "Add Tag" : "Manage Tags"}

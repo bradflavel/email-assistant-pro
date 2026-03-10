@@ -15,14 +15,29 @@ export default function SettingsModalSecure({ onClearSession, onClose }) {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-title"
+      onClick={onClose}
     >
-      <div className="w-full max-w-md space-y-4 rounded-lg border border-border bg-background p-6 text-foreground shadow-lg">
+      <div
+        className="w-full max-w-md space-y-4 rounded-lg border border-border bg-background p-6 text-foreground shadow-lg"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <h2 id="settings-title" className="text-xl font-semibold">
             Settings
@@ -58,8 +73,7 @@ export default function SettingsModalSecure({ onClearSession, onClose }) {
         </div>
 
         <div className="rounded-md border border-border bg-card p-4 text-sm text-muted-foreground">
-          Clear Session removes templates currently held in memory. Export first if
-          you need to keep them.
+          Clear Session removes your locally saved templates, tags, and filled values from this browser.
         </div>
 
         <button

@@ -8,7 +8,9 @@ function extractPlaceholders(content) {
 }
 
 export default function TemplateEditorSecure({
+  draftKey,
   onAddUserTag,
+  onDraftChange,
   selectedTemplate,
   onBack,
   onDeleteUserTag,
@@ -21,8 +23,15 @@ export default function TemplateEditorSecure({
   const [showTagManager, setShowTagManager] = useState(false);
   const [status, setStatus] = useState("");
   const textareaRef = useRef(null);
+  const initializedDraftKeyRef = useRef(null);
 
   useEffect(() => {
+    if (initializedDraftKeyRef.current === draftKey) {
+      return;
+    }
+
+    initializedDraftKeyRef.current = draftKey;
+
     if (selectedTemplate) {
       setTitle(selectedTemplate.title);
       setContent(selectedTemplate.content);
@@ -33,17 +42,22 @@ export default function TemplateEditorSecure({
       setTemplatePlaceholders([]);
     }
     setStatus("");
-  }, [selectedTemplate]);
+  }, [draftKey, selectedTemplate]);
 
-  const availablePlaceholders = useMemo(() => {
-    return [
-      ...new Set([
-        ...userTags,
-        ...templatePlaceholders,
-        ...extractPlaceholders(content),
-      ]),
-    ];
-  }, [content, templatePlaceholders, userTags]);
+  useEffect(() => {
+    onDraftChange?.({
+      id: selectedTemplate?.id || null,
+      title,
+      content,
+      placeholders: templatePlaceholders,
+    });
+  }, [content, onDraftChange, selectedTemplate?.id, templatePlaceholders, title]);
+
+  const availablePlaceholders = useMemo(
+    () =>
+      [...new Set([...userTags, ...templatePlaceholders, ...extractPlaceholders(content)])],
+    [content, templatePlaceholders, userTags]
+  );
 
   const handleSave = () => {
     if (!title.trim()) {
@@ -89,81 +103,94 @@ export default function TemplateEditorSecure({
   };
 
   return (
-    <div className="workspace-shell">
-      <div className="workspace-inner space-y-6 p-6 lg:p-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-black tracking-tight">Edit Template</h2>
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className="rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm text-muted-foreground hover:bg-accent/40"
-          >
-            Back
-          </button>
-        ) : null}
-      </div>
-
-      <div className="field-surface p-4">
-        <label className="mb-2 block text-lg font-bold">Template Title</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="e.g. Follow-up Email"
-          className="w-full bg-transparent px-1 py-2 text-lg text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </div>
-
-      <div className="field-surface p-5">
-        <div className="flex flex-col gap-4">
-          <div>
-            <label className="block text-lg font-bold">Email Content</label>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex min-h-[44px] flex-1 flex-wrap items-center gap-2">
-              <PlaceholderInserter
-                placeholders={availablePlaceholders}
-                onInsert={handleInsertPlaceholder}
-              />
-            </div>
+    <div className="workspace-shell h-full max-h-full overflow-hidden">
+      <div className="workspace-inner flex h-full min-h-0 flex-col gap-6 p-6 lg:p-8">
+        <div className="flex items-center justify-between">
+          <h2 className="ui-page-title">Edit Template</h2>
+          {onBack ? (
             <button
               type="button"
-              onClick={() => setShowTagManager(true)}
-              className="rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm font-medium hover:bg-accent/40"
+              onClick={onBack}
+              className="rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm text-muted-foreground hover:bg-accent/40"
             >
-              Add Tag
+              Back
             </button>
+          ) : null}
+        </div>
+
+        <div className="field-surface max-w-lg p-4">
+          <label className="ui-field-label mb-2 block">Template Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="e.g. Follow-up Email"
+            className="w-full bg-transparent px-1 py-2 text-base text-foreground outline-none placeholder:text-muted-foreground"
+          />
+        </div>
+
+        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,0.72fr)_minmax(16rem,0.28fr)]">
+          <div className="field-surface flex min-h-0 flex-col p-5">
+            <div className="flex items-center justify-between gap-4">
+              <label className="ui-field-label block">Email Content</label>
+            </div>
+
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              placeholder="Write your email here..."
+              rows={10}
+              className="custom-scrollbar mt-5 min-h-0 flex-1 resize-none rounded-[22px] border border-border/80 bg-background/80 px-5 py-4 text-sm leading-6 text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
+            />
+          </div>
+
+          <div className="nested-surface flex min-h-0 flex-col p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="ui-meta-label">
+                Available Tags
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTagManager(true)}
+                className="rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm font-medium hover:bg-accent/40"
+              >
+                Add Tag
+              </button>
+            </div>
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-auto pr-1">
+              <div className="flex flex-wrap items-start gap-2">
+                <PlaceholderInserter
+                  placeholders={availablePlaceholders}
+                  onInsert={handleInsertPlaceholder}
+                />
+                {availablePlaceholders.length === 0 ? (
+                  <span className="text-sm text-muted-foreground">No tags added yet.</span>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-          placeholder="Write your email here..."
-          rows={14}
-          className="mt-5 w-full resize-none rounded-[22px] border border-border/80 bg-background/80 px-5 py-4 text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
-        />
-      </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_rgba(15,23,42,0.24)] hover:opacity-90"
-        >
-          Save Template
-        </button>
-        {status ? <span className="text-sm text-muted-foreground">{status}</span> : null}
-      </div>
-      {showTagManager ? (
-        <TagManagerModal
-          existingTags={userTags}
-          onAddTag={handleAddTemplateTag}
-          onClose={() => setShowTagManager(false)}
-          onDeleteTag={onDeleteUserTag}
-        />
-      ) : null}
+        <div className="flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_rgba(15,23,42,0.24)] hover:opacity-90"
+          >
+            Save Template
+          </button>
+          {status ? <span className="text-sm text-muted-foreground">{status}</span> : null}
+        </div>
+
+        {showTagManager ? (
+          <TagManagerModal
+            existingTags={userTags}
+            onAddTag={handleAddTemplateTag}
+            onClose={() => setShowTagManager(false)}
+            onDeleteTag={onDeleteUserTag}
+          />
+        ) : null}
       </div>
     </div>
   );

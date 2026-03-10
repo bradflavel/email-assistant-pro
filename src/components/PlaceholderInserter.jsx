@@ -6,7 +6,7 @@ export default function PlaceholderInserter({ placeholders, onInsert }) {
           key={tag}
           type="button"
           onClick={() => onInsert(`{${tag}}`)}
-          className="px-2 py-1 text-sm bg-muted hover:bg-accent rounded transition"
+          className="tag-chip"
         >
           {`{${tag}}`}
         </button>
