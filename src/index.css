@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -14,58 +10,48 @@ body {
 
 @layer base {
   :root {
-    --background: 210 25% 96%;
-    --foreground: 222 49% 12%;
+    --background: 220 20% 97%;
+    --foreground: 224 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222 69% 18%;
+    --popover-foreground: 224 47% 11%;
+    --primary: 222 70% 23%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 205 33% 92%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 29% 93%;
-    --muted-foreground: 220 18% 39%;
-    --accent: 202 58% 92%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 212 28% 84%;
-    --input: 212 28% 84%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --secondary: 214 32% 93%;
+    --secondary-foreground: 224 47% 11%;
+    --muted: 214 32% 93%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 50% 91%;
+    --accent-foreground: 224 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 28% 88%;
+    --input: 214 28% 88%;
+    --ring: 222 70% 23%;
     --radius: 0.5rem;
   }
 
   html.dark {
-    --background: 223 62% 7%;
-    --foreground: 210 40% 98%;
-    --card: 223 72% 8%;
-    --card-foreground: 210 40% 98%;
-    --popover: 223 72% 8%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 41 89% 68%;
-    --primary-foreground: 223 72% 8%;
-    --secondary: 219 44% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 219 44% 13%;
-    --muted-foreground: 214 22% 72%;
-    --accent: 197 55% 16%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 224 47% 6%;
+    --foreground: 210 40% 96%;
+    --card: 224 47% 9%;
+    --card-foreground: 210 40% 96%;
+    --popover: 224 47% 9%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 40 90% 65%;
+    --primary-foreground: 224 47% 6%;
+    --secondary: 220 40% 14%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 220 40% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 200 45% 14%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 62% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 219 34% 21%;
-    --input: 219 34% 21%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --border: 220 30% 19%;
+    --input: 220 30% 19%;
+    --ring: 215 20% 75%;
   }
 
   html {
@@ -75,13 +61,16 @@ body {
   }
 
   body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     height: 100%;
     min-height: 100vh;
     overflow: hidden;
     background:
-      radial-gradient(circle at top left, rgba(250, 204, 21, 0.12), transparent 30%),
-      radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 34%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background)) 100%);
+      radial-gradient(ellipse 80% 45% at 50% -5%, hsl(var(--primary) / 0.07), transparent),
+      hsl(var(--background));
   }
 
   #root {
@@ -91,81 +80,85 @@ body {
 }
 
 @layer components {
+  /* ── Layout shells ── */
+
   .workspace-shell {
-    @apply relative overflow-hidden rounded-[24px] border border-border/70 bg-card/85 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur;
+    @apply relative overflow-hidden rounded-2xl border border-border/60 bg-card;
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.06), 0 6px 20px hsl(0 0% 0% / 0.04);
+  }
+
+  html.dark .workspace-shell {
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.35), 0 6px 20px hsl(0 0% 0% / 0.22);
   }
 
   .sidebar-shell {
-    background:
-      linear-gradient(180deg, hsl(var(--card) / 0.96), hsl(var(--card) / 0.92)),
-      radial-gradient(circle at top left, hsl(var(--primary) / 0.12), transparent 34%);
-    box-shadow: inset -1px 0 0 hsl(var(--border) / 0.55);
-  }
-
-  .workspace-shell::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.06), transparent 42%),
-      radial-gradient(circle at top right, rgba(250,204,21,0.12), transparent 26%);
-    pointer-events: none;
+    @apply flex-shrink-0 bg-card;
+    border-right: 1px solid hsl(var(--border) / 0.7);
   }
 
   .workspace-inner {
     @apply relative z-10;
   }
 
+  /* ── Typography ── */
+
   .section-kicker {
-    @apply text-[0.7rem] font-bold uppercase tracking-[0.28em] text-muted-foreground;
+    @apply text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-muted-foreground;
   }
 
   .ui-page-title {
-    @apply text-3xl font-black tracking-tight text-foreground;
+    @apply text-xl font-semibold tracking-tight text-foreground;
   }
 
   .ui-section-title {
-    @apply text-lg font-bold tracking-tight text-foreground;
+    @apply text-sm font-semibold tracking-tight text-foreground;
   }
 
   .ui-field-label {
-    @apply text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground;
+    @apply text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground;
   }
 
   .ui-meta-label {
-    @apply text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground;
+    @apply text-[0.68rem] font-medium uppercase tracking-[0.08em] text-muted-foreground;
   }
 
+  /* ── Surfaces ── */
+
   .field-surface {
-    @apply rounded-xl border border-border/80 bg-background/75 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15;
+    @apply rounded-xl border border-border/60 bg-background/70 shadow-sm transition-colors focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10;
   }
 
   .nested-surface {
-    @apply rounded-xl border border-border/60 transition-colors;
-    background-color: hsl(var(--background) / 0.52);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    @apply rounded-xl border border-border/50;
+    background-color: hsl(var(--muted) / 0.4);
   }
 
+  /* ── Interactive elements ── */
+
   .tag-chip {
-    @apply rounded-lg border border-border/70 bg-[linear-gradient(180deg,hsl(var(--background)/0.92),hsl(var(--background)/0.72))] px-3 py-1.5 text-sm font-medium text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition;
+    @apply rounded-md border border-border/60 bg-card px-2.5 py-1 text-xs font-medium text-foreground transition-colors;
   }
 
   .tag-chip:hover {
-    @apply border-primary/35 bg-accent/45 text-foreground;
+    @apply border-primary/30 bg-accent/60;
   }
 
+  /* ── Empty states ── */
+
   .empty-state-panel {
-    @apply rounded-xl border border-dashed border-border/80 px-5 py-6 text-center;
-    background-color: hsl(var(--background) / 0.42);
+    @apply rounded-xl border border-dashed border-border/60 px-5 py-8 text-center;
+    background-color: hsl(var(--background) / 0.4);
   }
 
   .empty-state-title {
-    @apply text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+    @apply text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground;
   }
 
   .empty-state-copy {
-    @apply mt-3 text-sm leading-6 text-muted-foreground;
+    @apply mt-2.5 text-sm leading-6 text-muted-foreground/80;
   }
+
+  /* ── Save-as alert ring ── */
 
   .save-as-button {
     position: relative;
@@ -176,7 +169,7 @@ body {
     content: "";
     position: absolute;
     inset: -2px;
-    border-radius: 1.15rem;
+    border-radius: 0.6rem;
     border: 1.5px solid rgba(248, 113, 113, 0.78);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.22);
     opacity: 1;
@@ -184,43 +177,48 @@ body {
     animation: save-as-ring 1.7s ease-in-out infinite;
   }
 
+  /* ── Scrollbar ── */
+
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(71, 85, 105, 0.75) rgba(15, 23, 42, 0.08);
+    scrollbar-color: hsl(var(--border)) transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 5px;
+    height: 5px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.08);
-    border-radius: 999px;
+    background: transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(100, 116, 139, 0.95), rgba(71, 85, 105, 0.95));
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: hsl(var(--border));
     border-radius: 999px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(148, 163, 184, 0.95), rgba(100, 116, 139, 0.95));
-    background-clip: padding-box;
+    background: hsl(var(--muted-foreground) / 0.4);
   }
+
+  /* ── Footer ── */
 
   .footer-shell {
-    background: linear-gradient(180deg, hsl(var(--card) / 0.16), hsl(var(--card) / 0.68));
-    border-top: 1px solid hsl(var(--border) / 0.6);
-    box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(180deg, hsl(var(--background) / 0), hsl(var(--background) / 0.75));
+    border-top: 1px solid hsl(var(--border) / 0.35);
   }
 
+  /* ── Settings ── */
+
   .settings-highlight {
-    background:
-      linear-gradient(180deg, hsl(var(--background) / 0.68), hsl(var(--background) / 0.52)),
-      radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 42%);
+    background: hsl(var(--muted) / 0.4);
+  }
+
+  /* ── Sidebar nav items ── */
+
+  .sidebar-nav-item {
+    @apply flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground;
   }
 }
 
@@ -238,8 +236,3 @@ body {
     box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.14);
   }
 }
-
-
-
-
-

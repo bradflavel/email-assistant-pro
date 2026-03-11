@@ -14,6 +14,7 @@ export default function SettingsScreenSecure({
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const summaryItems = useMemo(
     () => [
       { label: "Templates", value: templateCount },
@@ -36,42 +37,49 @@ export default function SettingsScreenSecure({
   return (
     <div className="workspace-shell h-full max-h-full overflow-hidden">
       <div className="workspace-inner flex h-full min-h-0 flex-col gap-5 p-5 lg:p-6">
+        {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="ui-page-title">Settings</h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               Manage appearance and local browser data for this workstation.
             </p>
           </div>
           <button
             type="button"
             onClick={onBack}
-            className="rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm text-muted-foreground hover:bg-accent/40"
+            className="rounded-lg border border-border/70 bg-background/60 px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent/50 hover:text-foreground"
           >
             Back
           </button>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        {/* Stats row */}
+        <div className="grid gap-3 lg:grid-cols-3">
           {summaryItems.map((item) => (
-            <div key={item.label} className="settings-highlight rounded-[22px] border border-border/60 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.05)]">
+            <div
+              key={item.label}
+              className="settings-highlight rounded-xl border border-border/50 p-4"
+            >
               <div className="ui-meta-label">{item.label}</div>
-              <div className="mt-2 text-3xl font-black tracking-tight">{item.value}</div>
+              <div className="mt-2 text-3xl font-bold tracking-tight">{item.value}</div>
             </div>
           ))}
         </div>
 
+        {/* Main grid */}
         <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,0.58fr)_minmax(20rem,0.42fr)]">
-          <div className="settings-highlight custom-scrollbar min-h-0 overflow-auto rounded-[24px] border border-border/70 p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+          {/* Appearance panel */}
+          <div className="settings-highlight custom-scrollbar min-h-0 overflow-auto rounded-2xl border border-border/50 p-5">
             <div className="ui-section-title">Appearance</div>
-            <div className="mt-1.5 text-sm text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               Switch the app theme for this browser only.
-            </div>
+            </p>
 
             <div className="nested-surface mt-5 flex items-center justify-between px-5 py-4">
               <div>
-                <div className="font-semibold">{darkMode ? "Dark Mode" : "Light Mode"}</div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="text-sm font-semibold">{darkMode ? "Dark Mode" : "Light Mode"}</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
                   {darkMode ? "Optimized for low-light work." : "Brighter neutral workspace."}
                 </div>
               </div>
@@ -80,26 +88,32 @@ export default function SettingsScreenSecure({
                 role="switch"
                 aria-checked={darkMode}
                 onClick={() => setDarkMode((prev) => !prev)}
-                className={`w-14 rounded-full px-1 py-1 transition-colors ${
+                onKeyDown={(event) => {
+                  if (event.key === " " || event.key === "Enter") {
+                    event.preventDefault();
+                    setDarkMode((prev) => !prev);
+                  }
+                }}
+                className={`w-12 rounded-full px-1 py-1 transition-colors ${
                   darkMode ? "bg-primary" : "bg-muted"
                 }`}
               >
                 <div
-                  className={`h-5 w-5 rounded-full bg-white transition-transform ${
-                    darkMode ? "translate-x-7" : "translate-x-0"
+                  className={`h-4 w-4 rounded-full bg-white transition-transform ${
+                    darkMode ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
             </div>
 
-            <div className="nested-surface mt-5 p-4">
-              <div className="font-semibold">Save Status</div>
-              <div className="mt-2 text-sm text-muted-foreground">
+            <div className="nested-surface mt-4 p-4">
+              <div className="text-sm font-semibold">Save Status</div>
+              <div className="mt-2 text-xs leading-5 text-muted-foreground">
                 {hasUnsavedFileChanges
                   ? "Your current library differs from the last JSON file save."
                   : "Your current library matches the last JSON file save in this session."}
               </div>
-              <div className="mt-3 text-sm text-muted-foreground">
+              <div className="mt-2 text-xs leading-5 text-muted-foreground">
                 {hasUnsavedEditorDraft
                   ? "An in-progress editor draft is currently stored in this browser."
                   : "There is no unsaved editor draft stored right now."}
@@ -107,53 +121,81 @@ export default function SettingsScreenSecure({
             </div>
           </div>
 
-          <div className="settings-highlight custom-scrollbar min-h-0 overflow-auto rounded-[24px] border border-border/70 p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+          {/* Local Data panel */}
+          <div className="settings-highlight custom-scrollbar min-h-0 overflow-auto rounded-2xl border border-border/50 p-5">
             <div className="ui-section-title">Local Data</div>
-            <div className="mt-1.5 text-sm text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               Clear only the part of browser data you actually want to reset.
-            </div>
+            </p>
 
             <div className="mt-5 space-y-3">
               <div className="nested-surface p-4">
-                <div className="font-semibold">Clear Filled Values</div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="text-sm font-semibold">Clear Filled Values</div>
+                <div className="mt-1 text-xs leading-5 text-muted-foreground">
                   Remove saved placeholder values while keeping templates and tags.
                 </div>
                 <button
                   type="button"
                   onClick={onClearFilledValues}
-                  className="mt-4 rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm font-medium hover:bg-accent/40"
+                  className="mt-4 rounded-lg border border-border/60 bg-background/60 px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent/50 hover:text-foreground"
                 >
                   Clear Filled Values
                 </button>
               </div>
 
               <div className="nested-surface p-4">
-                <div className="font-semibold">Clear Unsaved Draft</div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="text-sm font-semibold">Clear Unsaved Draft</div>
+                <div className="mt-1 text-xs leading-5 text-muted-foreground">
                   Remove the current in-progress editor draft stored in this browser.
                 </div>
                 <button
                   type="button"
                   onClick={onClearDraft}
-                  className="mt-4 rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm font-medium hover:bg-accent/40"
+                  className="mt-4 rounded-lg border border-border/60 bg-background/60 px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent/50 hover:text-foreground"
                 >
                   Clear Draft
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-red-300/40 bg-red-50/40 p-4 dark:border-red-900/60 dark:bg-red-950/20">
-                <div className="font-semibold">Clear All Local Data</div>
-                <div className="mt-1 text-sm text-muted-foreground">
+              <div className="rounded-xl border border-red-300/40 bg-red-50/40 p-4 dark:border-red-900/50 dark:bg-red-950/20">
+                <div className="text-sm font-semibold">Clear All Local Data</div>
+                <div className="mt-1 text-xs leading-5 text-muted-foreground">
                   Remove templates, tags, filled values, and draft data from this browser.
                 </div>
-                <button
-                  type="button"
-                  onClick={onClearSession}
-                  className="mt-4 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                >
-                  Clear Session
-                </button>
+                {showClearConfirm ? (
+                  <div className="mt-4 space-y-3">
+                    <p className="text-xs font-medium text-red-700 dark:text-red-300">
+                      Are you sure? This cannot be undone.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowClearConfirm(false)}
+                        className="rounded-lg border border-border/70 px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent/50 hover:text-foreground"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClearSession();
+                          setShowClearConfirm(false);
+                        }}
+                        className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                      >
+                        Yes, Clear Everything
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowClearConfirm(true)}
+                    className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+                  >
+                    Clear Session
+                  </button>
+                )}
               </div>
             </div>
           </div>

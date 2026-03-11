@@ -1,3 +1,16 @@
+function formatDate(isoString) {
+  if (!isoString) return null;
+  try {
+    return new Date(isoString).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return null;
+  }
+}
+
 export default function TemplateListSecure({
   templates,
   selectedTemplateId,
@@ -5,39 +18,42 @@ export default function TemplateListSecure({
 }) {
   const isEmpty = templates.length === 0;
 
-  return (
-    <div
-      className={`h-full pr-1 ${
-        isEmpty ? "flex items-center justify-center overflow-hidden px-6 pr-0 pl-0" : "space-y-3 overflow-y-auto"
-      }`}
-    >
-      {isEmpty ? (
-        <div className="empty-state-panel max-w-[13rem]">
+  if (isEmpty) {
+    return (
+      <div className="flex h-full items-center justify-center py-8">
+        <div className="empty-state-panel w-full max-w-[12rem]">
           <div className="empty-state-title">No templates yet</div>
-          <div className="empty-state-copy">Create a new template or load one from file.</div>
+          <div className="empty-state-copy">Create one or load from a file.</div>
         </div>
-      ) : null}
+      </div>
+    );
+  }
 
+  return (
+    <div className="space-y-0.5">
       {templates.map((template) => {
         const isSelected = template.id === selectedTemplateId;
+        const dateLabel = formatDate(template.updatedAt);
 
         return (
-          <div
+          <button
             key={template.id}
-            className="group relative"
+            type="button"
+            onClick={() => onSelect(template.id)}
+            title={template.title}
+            className={`w-full rounded-lg px-3 py-2.5 text-left transition-colors ${
+              isSelected
+                ? "bg-accent/80 text-foreground"
+                : "text-foreground hover:bg-accent/40"
+            }`}
           >
-            <button
-              type="button"
-              onClick={() => onSelect(template.id)}
-              className={`w-full rounded-xl border p-4 text-left transition ${
-                isSelected
-                  ? "border-amber-300/80 bg-amber-50/85 shadow-[0_10px_24px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:shadow-[0_10px_24px_rgba(15,23,42,0.24)]"
-                  : "border-border/80 bg-background/72 hover:bg-accent/35 dark:bg-background/40 dark:hover:bg-white/10"
-              }`}
-            >
-              <div className="text-[0.95rem] font-semibold text-foreground">{template.title}</div>
-            </button>
-          </div>
+            <div className="truncate text-sm font-medium">{template.title}</div>
+            {dateLabel ? (
+              <div className="mt-0.5 truncate text-[0.68rem] text-muted-foreground">
+                {dateLabel}
+              </div>
+            ) : null}
+          </button>
         );
       })}
     </div>
